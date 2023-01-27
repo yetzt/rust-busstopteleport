@@ -70,6 +70,19 @@ namespace Oxide.Plugins {
 			storedData = Interface.Oxide.DataFileSystem.ReadObject<StoredData>("BusStopTeleport");
 			resetNetwork();
 		}
+		
+		void Unload() {
+
+			// Remove Chairs
+			foreach(var item in storedData.BusStops.Values) {
+				var chair = BaseNetworkable.serverEntities.Find(item.Chair) as BaseEntity;
+				if (chair != null) chair.Kill();
+			}
+			
+			// Delete Data
+			storedData.Clear();
+			
+		};
 
 		void showUI(BasePlayer player, uint chair) {
 
