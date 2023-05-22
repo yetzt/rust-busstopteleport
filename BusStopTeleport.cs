@@ -10,8 +10,7 @@ using Oxide.Core;
 using Rust;
 
 namespace Oxide.Plugins {
-	
-	[Info("Bus Stop Teleport", "yetzt", "1.0.0")]
+	[Info("Bus Stop Teleport", "yetzt", "1.0.1")]
 	[Description("Teleport using Bus Stops")]
 
 	public class BusStopTeleport : RustPlugin {
