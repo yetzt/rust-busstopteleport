@@ -52,19 +52,19 @@ namespace Oxide.Plugins {
 			cmd.AddConsoleCommand("busstop.teleport", this, nameof(cmdTeleport));
 			cmd.AddConsoleCommand("busstop.reset", this, nameof(cmdResetNetwork));
 		}
-		
+
 		private bool IsAdmin(BasePlayer player) {
 			if (player == null) return false;
 			if (player?.net?.connection == null) return true;
 			return player.net.connection.authLevel > 0;
 		}
-		
-		
+
+
 		[ChatCommand("bus")]
 		void replyBus(BasePlayer player, string cmd, string[] args) {
 			if (IsAdmin(player)) showUI(player, new NetworkableId(0));
 		}
-		
+
 		void OnServerInitialized() {
 			Puts("Initializing");
 			storedData = Interface.Oxide.DataFileSystem.ReadObject<StoredData>("BusStopTeleport");
@@ -90,19 +90,19 @@ namespace Oxide.Plugins {
 			if (hasUI.Contains(player.userID)) {
 				hasUI.Remove(player.userID);
 				return;
-			} 
-			
+			}
+
 			var container = new CuiElementContainer();
 
 			// overlay
 			container.Add(new CuiPanel {
 				CursorEnabled = true,
-				Image = { 
-					Color = "0 0 0 0" 
+				Image = {
+					Color = "0 0 0 0"
 				},
-				RectTransform = { 
-					AnchorMin = "0 0", 
-					AnchorMax = "1 1" 
+				RectTransform = {
+					AnchorMin = "0 0",
+					AnchorMax = "1 1"
 				}
 			}, "Overlay", Layer);
 
@@ -137,7 +137,7 @@ namespace Oxide.Plugins {
 					FontSize = 20
 				}
 			}, Layer);
-			
+
 			// headline
 			container.Add(new CuiLabel {
 				RectTransform = {
@@ -177,7 +177,7 @@ namespace Oxide.Plugins {
 					FontSize = 50
 				}
 			}, Layer);
-			
+
 			// add vertical line
 			container.Add(new CuiPanel {
 				Image = new CuiImageComponent
@@ -190,12 +190,12 @@ namespace Oxide.Plugins {
 					AnchorMax = "0.252 1"
 				}
 			}, Layer);
-			
+
 			int i = 0;
 			foreach(var item in storedData.BusStops.Values) {
-			
+
 				if (chair == item.Chair) continue;
-			
+
 				//a dot
 				container.Add(new CuiPanel {
 					Image = new CuiImageComponent {
@@ -219,7 +219,7 @@ namespace Oxide.Plugins {
 						FontSize = 20
 					}
 				}, Layer);
-			
+
 				container.Add(new CuiButton {
 					RectTransform = {
 						AnchorMin = "0.26 "+(0.93f-(i*0.035f)).ToString(),
@@ -237,20 +237,20 @@ namespace Oxide.Plugins {
 						FontSize = 20
 					}
 				}, Layer);
-				
+
 				i++;
-			
+
 			}
-			
+
 			CuiHelper.DestroyUi(player, Layer);
 			CuiHelper.AddUi(player, container);
-			
+
 			hasUI.Add(player.userID);
 
 		}
 
 		private void resetNetwork() {
-			
+
 			foreach(var item in storedData.BusStops.Values) {
 				var chair = BaseNetworkable.serverEntities.Find(item.Chair) as BaseEntity;
 				if (chair != null) chair.Kill();
@@ -260,9 +260,9 @@ namespace Oxide.Plugins {
 			storedData.Chairs = new List<NetworkableId>();
 
 			FindMonuments();
-			
+
 		}
-		
+
 		private void closeUI(ConsoleSystem.Arg arg) {
 			var player = arg.Player();
 			if (player == null) return;
@@ -270,7 +270,7 @@ namespace Oxide.Plugins {
 			CuiHelper.DestroyUi(player, Layer);
 			hasUI.Remove(player.userID);
 		}
-		
+
 		private void cmdTeleport(ConsoleSystem.Arg arg) {
 			var player = arg.Player();
 			if (player == null) return;
@@ -284,20 +284,20 @@ namespace Oxide.Plugins {
 			performTeleport(player, busstop.Location);
 			return;
 		}
-		
+
 		private void cmdResetNetwork(ConsoleSystem.Arg arg) {
 			if (IsAdmin(arg.Player())) resetNetwork();
 		}
 
 		void performTeleport(BasePlayer player, Vector3 position){
-						
+
 			HeldEntity heldEntity = player.GetHeldEntity();
 			if (heldEntity != null) heldEntity.SetHeld(false);
 
 			player.EnsureDismounted();
-			
+
 			if (player.net?.connection != null) player.ClientRPCPlayer(null, player, "StartLoading");
-			
+
 			if (!player.IsSleeping()) {
 				player.SetPlayerFlag(BasePlayer.PlayerFlags.Sleeping, true);
 				if (!BasePlayer.sleepingPlayerList.Contains(player)) BasePlayer.sleepingPlayerList.Add(player);
@@ -321,9 +321,9 @@ namespace Oxide.Plugins {
 			Wakeup(player);
 
 			return;
-			
+
 		}
-		
+
 		private void Wakeup(BasePlayer player) {
 			if (!player.IsConnected) return;
 			if (player.IsReceivingSnapshot) {
@@ -339,7 +339,7 @@ namespace Oxide.Plugins {
 
 			foreach (var go in UnityEngine.Object.FindObjectsOfType<GameObject>()) {
 				if (go.name != "assets/bundled/prefabs/autospawn/decor/busstop/busstop.prefab") continue;
-				
+
 				// spawn invisible chair, fallback to visible chair
 				var chair = GameManager.server.CreateEntity("assets/bundled/prefabs/static/chair.invisible.static.prefab", go.transform.position, go.transform.rotation, true);
 				if (chair == null) chair = GameManager.server.CreateEntity("assets/bundled/prefabs/static/chair_b.static.prefab", go.transform.position, go.transform.rotation, true);
@@ -352,19 +352,19 @@ namespace Oxide.Plugins {
 
 				Vector3 pos = go.transform.position;
 				pos.y = pos.y+0.3f;
-				
+
 				storedData.Chairs.Add(chair.net.ID);
 				busstops.Add(chair.net.ID, go);
 
 			}
-			
+
 			Puts($"Found {busstops.Count} Bus Stops.");
 
 			List<NetworkableId> doublecheck = new List<NetworkableId>();
 
 			foreach (var monument in TerrainMeta.Path.Monuments) {
 				if (monument.name.Contains("substation") || monument.name.Contains("cave") || monument.name.Contains("tiny")) continue;
-				
+
 				float size = 0f;
 				string name = "";
 
@@ -373,24 +373,24 @@ namespace Oxide.Plugins {
 						name = "Lighthouse";
 						size = 100f;
 						break;
-						
+
 					case "stables_a.prefab":
 						name = "Stables";
 						size = 100f;
 						break;
-						
+
 					case "stables_b.prefab":
 						name = "Barn";
 						size = 100f;
 						break;
-						
+
 					case "fishing_village_a.prefab":
 					case "fishing_village_b.prefab":
 					case "fishing_village_c.prefab":
 						name = "Fishing Village";
 						size = 100f;
 						break;
-						
+
 					case "harbor_1.prefab":
 					case "harbor_2.prefab":
 						name = "Harbor";
@@ -472,27 +472,27 @@ namespace Oxide.Plugins {
 						size = 200f;
 						break;
 
-					case "swamp_c.prefab": 
+					case "swamp_c.prefab":
 						name = "Abandonned Cabins";
 						size = 150f;
 						break;
 
-					case "sphere_tank.prefab": 
+					case "sphere_tank.prefab":
 						name = "Dome";
 						size = 150f;
 						break;
 
-					case "mining_quarry_a.prefab": 
+					case "mining_quarry_a.prefab":
 						name = "Sulphur Quarry";
 						size = 100f;
 						break;
 
-					case "mining_quarry_b.prefab": 
+					case "mining_quarry_b.prefab":
 						name = "Stone Quarry";
 						size = 100f;
 						break;
 
-					case "mining_quarry_c.prefab": 
+					case "mining_quarry_c.prefab":
 						name = "HQM Quarry";
 						size = 100f;
 						break;
@@ -561,7 +561,7 @@ namespace Oxide.Plugins {
 				}
 
 				// find closest bus stop
-				
+
 				float dist = 1000f;
 				float newdist = 0f;
 				bool found = false;
@@ -571,7 +571,7 @@ namespace Oxide.Plugins {
 				foreach (KeyValuePair<NetworkableId, GameObject> busstop in busstops) {
 
 					if (doublecheck.Contains(busstop.Key)) continue;
-				
+
 					newdist = Vector3.Distance(monument.transform.position, busstop.Value.transform.position);
 					// Puts($"{monument.transform.position} ↔ {name}: {newdist}");
 					if (newdist > size) continue;
@@ -581,32 +581,32 @@ namespace Oxide.Plugins {
 						closest = busstop.Value;
 						closestchair = busstop.Key;
 					}
-					
+
 				}
-				
+
 				if (found) {
 					Puts($"Found Busstop for '{name}' at {closest.transform.position}");
-				
+
 					// add bus stop to dboubleckeck
 					doublecheck.Add(closestchair);
-				
+
 					Vector3 pos = closest.transform.position;
 					pos.y = pos.y+0.3f;
-					
+
 					string grid = getGrid(pos);
 					busStop = new BusStop(pos, name, grid, closestchair);
-				
+
 					storedData.BusStops.Add(closestchair, busStop);
-					
+
 				} else {
 					Puts($"No Busstop for '{name}'");
 				}
-				
+
 			}
 
 			// return list
 			SaveData();
-			
+
 		}
 
 		string getGrid(Vector3 pos) { // FIXME this is not always correct
@@ -616,18 +616,18 @@ namespace Oxide.Plugins {
 			letter = (char)(((int)letter)+x);
 			return $"{letter}{z}";
 		}
-		
+
 		object CanMountEntity(BasePlayer player, BaseMountable entity) {
 
 			if (!storedData.Chairs.Contains(entity.net.ID)) return null;
-			
+
 			// noescape integration
 			var flag = NoEscape?.Call<bool>("IsEscapeBlocked", player) ?? false;
 			if (flag == true) {
 				Player.Message(player, "You are still blocked from taking the bus");
 				return null;
 			}
-			
+
 			showUI(player, entity.net.ID);
 			return null;
 
@@ -638,14 +638,14 @@ namespace Oxide.Plugins {
 			if (player == null) return null;
 
 			if (!storedData.Chairs.Contains(entity.net.ID)) return null;
-			
+
 			CuiHelper.DestroyUi(player, Layer);
 			hasUI.Remove(player.userID);
 
 			return null;
 
 		}
-	
+
 	}
 
 }
