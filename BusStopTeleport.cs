@@ -519,6 +519,11 @@ namespace Oxide.Plugins {
 						size = 150f;
 						break;
 
+					case "nuclear_missile_silo.prefab":
+						name = "Nuclear Missile Silo";
+						size = 200f;
+					break;
+
 					case "monument_marker.prefab":
 						// Puts("marker "+monument.name+" "+monument.transform.root.name);
 						name = monument.transform.root.name;
