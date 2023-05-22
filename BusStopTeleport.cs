@@ -23,8 +23,8 @@ namespace Oxide.Plugins {
 		private readonly string Layer = "busstopUI";
 
 		class StoredData {
-			public Dictionary<uint, BusStop> BusStops = new Dictionary<uint, BusStop>();
-			public List<uint> Chairs = new List<uint>();
+			public Dictionary<NetworkableId, BusStop> BusStops = new Dictionary<NetworkableId, BusStop>();
+			public List<NetworkableId> Chairs = new List<NetworkableId>();
 			public StoredData(){}
 		}
 		StoredData storedData;
@@ -33,9 +33,9 @@ namespace Oxide.Plugins {
 			public Vector3 Location = new Vector3();
 			public string Label = "";
 			public string Grid = "";
-			public uint Chair = 0;
+			public NetworkableId Chair = new NetworkableId(0);
 			public BusStop(){}
-			public BusStop(Vector3 pos, string label, string grid, uint chair) {
+			public BusStop(Vector3 pos, string label, string grid, NetworkableId chair) {
 				Location = pos;
 				Label = label;
 				Grid = grid;
@@ -62,7 +62,7 @@ namespace Oxide.Plugins {
 		
 		[ChatCommand("bus")]
 		void replyBus(BasePlayer player, string cmd, string[] args) {
-			if (IsAdmin(player)) showUI(player, (uint)0);
+			if (IsAdmin(player)) showUI(player, new NetworkableId(0));
 		}
 		
 		void OnServerInitialized() {
@@ -84,7 +84,7 @@ namespace Oxide.Plugins {
 			
 		};
 
-		void showUI(BasePlayer player, uint chair) {
+		void showUI(BasePlayer player, NetworkableId chair) {
 
 			CuiHelper.DestroyUi(player, Layer);
 			if (hasUI.Contains(player.userID)) {
@@ -255,10 +255,10 @@ namespace Oxide.Plugins {
 				var chair = BaseNetworkable.serverEntities.Find(item.Chair) as BaseEntity;
 				if (chair != null) chair.Kill();
 			}
-			
-			storedData.BusStops = new Dictionary<uint, BusStop>();
-			storedData.Chairs = new List<uint>();
-			
+
+			storedData.BusStops = new Dictionary<NetworkableId, BusStop>();
+			storedData.Chairs = new List<NetworkableId>();
+
 			FindMonuments();
 			
 		}
@@ -279,8 +279,8 @@ namespace Oxide.Plugins {
 			hasUI.Remove(player.userID);
 
 			BusStop busstop;
-			if (!storedData.BusStops.TryGetValue(Convert.ToUInt32(arg.Args[0]), out busstop)) return;
-	
+			if (!storedData.BusStops.TryGetValue(new NetworkableId(Convert.ToUInt32(arg.Args[0])), out busstop)) return;
+
 			performTeleport(player, busstop.Location);
 			return;
 		}
@@ -334,9 +334,9 @@ namespace Oxide.Plugins {
 		}
 
 		void FindMonuments() {
-			
-			Dictionary<uint, GameObject> busstops = new Dictionary<uint, GameObject>();
-			
+
+			Dictionary<NetworkableId, GameObject> busstops = new Dictionary<NetworkableId, GameObject>();
+
 			foreach (var go in UnityEngine.Object.FindObjectsOfType<GameObject>()) {
 				if (go.name != "assets/bundled/prefabs/autospawn/decor/busstop/busstop.prefab") continue;
 				
@@ -359,9 +359,9 @@ namespace Oxide.Plugins {
 			}
 			
 			Puts($"Found {busstops.Count} Bus Stops.");
-			
-			List<uint> doublecheck = new List<uint>();
-			
+
+			List<NetworkableId> doublecheck = new List<NetworkableId>();
+
 			foreach (var monument in TerrainMeta.Path.Monuments) {
 				if (monument.name.Contains("substation") || monument.name.Contains("cave") || monument.name.Contains("tiny")) continue;
 				
@@ -566,10 +566,10 @@ namespace Oxide.Plugins {
 				float newdist = 0f;
 				bool found = false;
 				GameObject closest = new GameObject();
-				uint closestchair = 0;
+				NetworkableId closestchair = new NetworkableId(0);
 
-				foreach (KeyValuePair<uint, GameObject> busstop in busstops) {
-				
+				foreach (KeyValuePair<NetworkableId, GameObject> busstop in busstops) {
+
 					if (doublecheck.Contains(busstop.Key)) continue;
 				
 					newdist = Vector3.Distance(monument.transform.position, busstop.Value.transform.position);
