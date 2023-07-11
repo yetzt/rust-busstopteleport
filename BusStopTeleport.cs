@@ -10,10 +10,12 @@ using Oxide.Core;
 using Rust;
 
 namespace Oxide.Plugins {
-	[Info("Bus Stop Teleport", "yetzt", "1.0.1")]
+	[Info("Bus Stop Teleport", "yetzt", "1.0.2")]
 	[Description("Teleport using Bus Stops")]
 
 	public class BusStopTeleport : RustPlugin {
+
+		private const string UsePerm = "busstopteleport.use";
 
 		[PluginReference]
 		private Plugin NoEscape;
@@ -47,6 +49,7 @@ namespace Oxide.Plugins {
 		void SaveData() => Interface.Oxide.DataFileSystem.WriteObject("BusStopTeleport", storedData);
 
 		private void Init() {
+			permission.RegisterPermission(UsePerm, this);
 			cmd.AddConsoleCommand("busstop.close", this, nameof(closeUI));
 			cmd.AddConsoleCommand("busstop.teleport", this, nameof(cmdTeleport));
 			cmd.AddConsoleCommand("busstop.reset", this, nameof(cmdResetNetwork));
@@ -61,7 +64,7 @@ namespace Oxide.Plugins {
 
 		[ChatCommand("bus")]
 		void replyBus(BasePlayer player, string cmd, string[] args) {
-			if (IsAdmin(player)) showUI(player, 0);
+			if (IsAdmin(player) || permission.UserHasPermission(player.userID.ToString(), UsePerm)) showUI(player, 0);
 		}
 
 		void OnServerInitialized() {

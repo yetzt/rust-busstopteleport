@@ -6,7 +6,7 @@ The plugin finds bus stops close to monuments and custom markers and makes the b
 
 ## Permissions
 
-No Permissions are required.
+* `busstopteleport.use` -- Allow users to open the Teleport UI via the `/bus` chat command (intended for admin use)
 
 ## Configuration
 
@@ -15,4 +15,4 @@ No Configuration is required
 ## Admin Commands
 
 * `busstop.reset` - Reset plugin
-* `/bus` - Show teleport UI (admin only)
+* `/bus` - Show teleport UI (intended for admin use)
